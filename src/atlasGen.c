@@ -8,6 +8,7 @@
 #include <string.h>
 #include <sys/stat.h>
 
+#include "cJSON.h"
 #include "structs.h"
 
 static Image *images;
@@ -301,6 +302,9 @@ int main(int argc, char *argv[])
 	int			 w, h, rotated, i, fails, rotations, numImages;
 	SDL_Surface *atlas;
 	SDL_Rect	 dest;
+	cJSON		  *rootJSON, *entryJSON;
+	char		 *out;
+	FILE		 *fp;
 
 	handleCommandLine(argc, argv);
 
@@ -319,6 +323,8 @@ int main(int argc, char *argv[])
 	numImages = initImages();
 
 	atlas = SDL_CreateRGBSurface(0, atlasSize, atlasSize, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
+
+	rootJSON = cJSON_CreateArray();
 
 	for (i = 0; i < numImages; i++)
 	{
@@ -360,6 +366,17 @@ int main(int argc, char *argv[])
 			}
 
 			printf("[%04d / %04d] %s\n", i + 1, numImages, images[i].filename);
+
+			entryJSON = cJSON_CreateObject();
+
+			cJSON_AddStringToObject(entryJSON, "filename", images[i].filename);
+			cJSON_AddNumberToObject(entryJSON, "x", dest.x);
+			cJSON_AddNumberToObject(entryJSON, "y", dest.y);
+			cJSON_AddNumberToObject(entryJSON, "w", dest.w);
+			cJSON_AddNumberToObject(entryJSON, "h", dest.h);
+			cJSON_AddNumberToObject(entryJSON, "rotated", rotated);
+
+			cJSON_AddItemToArray(rootJSON, entryJSON);
 		}
 		else
 		{
@@ -372,15 +389,25 @@ int main(int argc, char *argv[])
 		free(images[i].filename);
 	}
 
-	free(images);
+	out = cJSON_Print(rootJSON);
+
+	fp = fopen("atlas.json", "wb");
+	fprintf(fp, "%s", out);
+	fclose(fp);
 
 	IMG_SavePNG(atlas, "atlas.png");
+
+	free(images);
 
 	SDL_FreeSurface(atlas);
 
 	freeNode(root);
 
 	free(root);
+
+	cJSON_Delete(rootJSON);
+
+	free(out);
 
 	printf("Images: %d, Failures: %d, Rotations: %d\n", numImages, fails, rotations);
 
