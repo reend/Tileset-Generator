@@ -1,5 +1,5 @@
-Project (atlas01)
-set(ATLAS_GEN_NAME "gen01")
+Project (atlas03)
+set(ATLAS_GEN_NAME "gen03")
 CMake_Minimum_Required (VERSION 3.1)
 
 include(FindPkgConfig)
@@ -30,7 +30,7 @@ Target_Link_Libraries (
 )
 
 # Gen
-Add_Executable (${ATLAS_GEN_NAME} "src/atlasGen.c")
+Add_Executable (${ATLAS_GEN_NAME} "src/atlasGen.c" "src/cJSON.c")
 set_property(TARGET ${ATLAS_GEN_NAME} PROPERTY CXX_STANDARD 20)
 
 Target_Link_Libraries (
