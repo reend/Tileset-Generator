@@ -1,5 +1,5 @@
-Project (atlas03)
-set(ATLAS_GEN_NAME "gen03")
+Project (atlas)
+set(ATLAS_GEN_NAME "gen")
 CMake_Minimum_Required (VERSION 3.1)
 
 include(FindPkgConfig)
